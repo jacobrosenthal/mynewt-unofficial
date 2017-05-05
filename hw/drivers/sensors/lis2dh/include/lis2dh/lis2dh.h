@@ -29,7 +29,7 @@ extern "C" {
 #endif
 
 /* Power modes */
-enum lis2dh_pwr_mode {
+enum lis2dh_accel_pwr_mode {
     LIS2DH_PWR_MODE_SUSPEND         = 0X00,
     LIS2DH_PWR_MODE_NORMAL          = 0X01,
     LIS2DH_PWR_MODE_LOWPOWER        = 0X02,
@@ -86,7 +86,7 @@ lis2dh_shell_init(void);
 #endif
 
 struct lis2dh_cfg {
-    enum lis2dh_pwr_mode mode;
+    enum lis2dh_accel_pwr_mode accel_mode;
     enum lis2dh_accel_range accel_range;
     enum lis2dh_accel_rate accel_rate;
     enum lis2dh_click_mode click_mode;

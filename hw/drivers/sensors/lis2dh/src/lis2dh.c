@@ -89,7 +89,7 @@ static const struct sensor_driver g_lis2dh_sensor_driver = {
 int
 lis2dh_default_cfg(struct lis2dh_cfg *cfg)
 {
-    cfg->mode = LIS2DH_PWR_MODE_SUSPEND;
+    cfg->accel_mode = LIS2DH_PWR_MODE_SUSPEND;
     cfg->accel_range = LIS2DH_ACCEL_RANGE_2;
     cfg->accel_rate = LIS2DH_ACCEL_RATE_OFF;
     cfg->click_mode = LIS2DH_CLICK_OFF;
@@ -261,7 +261,7 @@ lis2dh_get_vector_data(void *datastruct, struct lis2dh *lis)
 
     uint8_t resolution_shift;
 
-    switch(lis->cfg.mode) {
+    switch(lis->cfg.accel_mode) {
         case LIS2DH_PWR_MODE_HIGHRESOLUTION:
             // 12-bit
             resolution_shift = 4;

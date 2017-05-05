@@ -282,7 +282,7 @@ lis2dh_accel_configure(struct lis2dh_cfg *cfg)
     uint8_t ctrl_reg4 = cfg->accel_range;
     uint8_t ctrl_reg1 = cfg->accel_rate;
 
-    switch(cfg->mode)
+    switch(cfg->accel_mode)
     {
         case LIS2DH_PWR_MODE_NORMAL:
             ctrl_reg1 = ctrl_reg1 |
