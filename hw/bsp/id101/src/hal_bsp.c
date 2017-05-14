@@ -20,62 +20,63 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <assert.h>
-#include "hal/hal_system.h"
-#include "bsp/bsp.h"
-#include <nrf51.h>
-#include "mcu/nrf51_hal.h"
-#include "hal/hal_bsp.h"
-#include "os/os_cputime.h"
 #include "syscfg/syscfg.h"
+#include "hal/hal_bsp.h"
+#include "hal/hal_system.h"
+#include "mcu/nrf51_hal.h"
+#include "bsp/bsp.h"
+#include "os/os_dev.h"
+#include "os/os_cputime.h"
 #include "flash_map/flash_map.h"
 #include "hal/hal_flash.h"
 #include "hal/hal_spi.h"
-#include "os/os_dev.h"
-#if MYNEWT_VAL(LIS2DH_PRESENT)
-#include <lis2dh/lis2dh.h>
-static struct lis2dh lis2dh;
-#endif
-
-#if MYNEWT_VAL(PWM_0)
-#include <pwm/pwm.h>
-#include "pwm_nrf51/pwm_nrf51.h"
-struct pwm_dev os_bsp_pwm0;
-#endif
-
-#if MYNEWT_VAL(UART_0)
-#include "uart/uart.h"
-#include "uart_hal/uart_hal.h"
-
-static struct uart_dev os_bsp_uart0;
-static const struct nrf51_uart_cfg os_bsp_uart0_cfg = {
-    .suc_pin_tx = MYNEWT_VAL(UART_0_PIN_TX),
-    .suc_pin_rx = MYNEWT_VAL(UART_0_PIN_RX),
-    .suc_pin_rts = MYNEWT_VAL(UART_0_PIN_RTS),
-    .suc_pin_cts = MYNEWT_VAL(UART_0_PIN_CTS),
-};
+#include "hal/hal_i2c.h"
+#if MYNEWT_VAL(SSD1306_PRESENT)
+#include <ssd1306/ssd1306.h>
+static struct ssd1306 ssd1306;
 #endif
 
 
-
-
+//DISPLAY SSD1306
 #if MYNEWT_VAL(SPI_0_MASTER)
 /*
  * NOTE: Our HAL expects that the SS pin, if used, is treated as a gpio line
  * and is handled outside the SPI routines.
  */
 static const struct nrf51_hal_spi_cfg os_bsp_spi0m_cfg = {
-    .sck_pin      = 5,
-    .mosi_pin     = 4,
-    .miso_pin     = 3
+    .sck_pin      = 29,
+    .mosi_pin     = 28
 };
 #endif
 
 #if MYNEWT_VAL(SPI_1_SLAVE)
 static const struct nrf51_hal_spi_cfg os_bsp_spi1s_cfg = {
-    .sck_pin      = 5,
-    .mosi_pin     = 4,
-    .miso_pin     = 3,
-    .ss_pin       = 2
+    .sck_pin      = 29,
+    .mosi_pin     = 28,
+    .miso_pin     = 30
+    .ss_pin       = 17
+};
+#endif
+
+//WINBOND W25Q80BL
+#if MYNEWT_VAL(SPI_1_MASTER)
+/*
+ * NOTE: Our HAL expects that the SS pin, if used, is treated as a gpio line
+ * and is handled outside the SPI routines.
+ */
+static const struct nrf51_hal_spi_cfg os_bsp_spi1m_cfg = {
+    .sck_pin      = 29,
+    .mosi_pin     = 28,
+    .miso_pin     = 30
+};
+#endif
+
+//CAP TOUCH IQS263
+#if MYNEWT_VAL(I2C_0)
+static const struct nrf51_hal_i2c_cfg hal_i2c_cfg = {
+    .scl_pin = 3,
+    .sda_pin = 4,
+    .i2c_frequency = 100    /* 100 kHz */
 };
 #endif
 
@@ -139,27 +140,6 @@ hal_bsp_get_nvic_priority(int irq_num, uint32_t pri)
     return cfg_pri;
 }
 
-static void
-sensor_dev_create(void)
-{
-    int rc;
-
-    (void)rc;
-#if MYNEWT_VAL(LIS2DH_PRESENT)
-    rc = os_dev_create((struct os_dev *) &lis2dh, "accel0",
-      OS_DEV_INIT_PRIMARY, 0, lis2dh_init, NULL);
-    assert(rc == 0);
-#endif
-
-#if MYNEWT_VAL(PWM_0)
-    //this would probably be in the bsp except the licensing issues?
-    rc = os_dev_create((struct os_dev *) &os_bsp_pwm0, "pwm0",
-            OS_DEV_INIT_KERNEL, OS_DEV_INIT_PRIO_DEFAULT,
-            nrf51_pwm_dev_init, NULL);
-    assert(rc == 0);
-#endif
-}
-
 void
 hal_bsp_init(void)
 {
@@ -169,12 +149,6 @@ hal_bsp_init(void)
 
     /* Make sure system clocks have started */
     hal_system_clock_start();
-
-#if MYNEWT_VAL(UART_0)
-    rc = os_dev_create((struct os_dev *) &os_bsp_uart0, "uart0",
-      OS_DEV_INIT_PRIMARY, 0, uart_hal_init, (void *)&os_bsp_uart0_cfg);
-    assert(rc == 0);
-#endif
 
 #if MYNEWT_VAL(TIMER_0)
     rc = hal_timer_init(0, NULL);
@@ -188,6 +162,7 @@ hal_bsp_init(void)
     rc = hal_timer_init(2, NULL);
     assert(rc == 0);
 #endif
+
 #if MYNEWT_VAL(TIMER_3)
     rc = hal_timer_init(3, NULL);
     assert(rc == 0);
@@ -203,10 +178,24 @@ hal_bsp_init(void)
     assert(rc == 0);
 #endif
 
+#if MYNEWT_VAL(SPI_1_MASTER)
+    rc = hal_spi_init(1, (void *)&os_bsp_spi1m_cfg, HAL_SPI_TYPE_MASTER);
+    assert(rc == 0);
+#endif
+
 #if MYNEWT_VAL(SPI_1_SLAVE)
     rc = hal_spi_init(1, (void *)&os_bsp_spi1s_cfg, HAL_SPI_TYPE_SLAVE);
     assert(rc == 0);
 #endif
 
-    sensor_dev_create();
+#if MYNEWT_VAL(I2C_0)
+    rc = hal_i2c_init(0, (void *)&hal_i2c_cfg);
+    assert(rc == 0);
+#endif
+
+#if MYNEWT_VAL(SSD1306_PRESENT)
+    rc = os_dev_create((struct os_dev *) &ssd1306, "display0",
+      OS_DEV_INIT_PRIMARY, 0, ssd1306_init, NULL);
+    assert(rc == 0);
+#endif
 }
