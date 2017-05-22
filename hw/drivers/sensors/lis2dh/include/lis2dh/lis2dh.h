@@ -91,6 +91,9 @@ struct lis2dh_cfg {
     enum lis2dh_accel_rate accel_rate;
     enum lis2dh_click_mode click_mode;
     enum lis2dh_click_dir click_direction;
+    //sleep/wake
+    uint8_t accel_wake_threshold;
+    uint8_t accel_sleep_time_limit;
     //single
     uint8_t click_threshold;
     uint8_t click_time_limit;
@@ -117,7 +120,7 @@ int
 lis2dh_default_cfg(struct lis2dh_cfg *cfg);
 
 int
-lis2dh_get_vector_data(void *datastruct, struct lis2dh *lis);
+lis2dh_get_vector_data(void *datastruct, struct lis2dh_cfg *cfg);
 
 /**
  * Get temperature from bno055 sensor

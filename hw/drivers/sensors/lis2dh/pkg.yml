@@ -22,3 +22,6 @@ pkg.description: Driver for the LIS2DH 3 axis accel
 pkg.author:
 pkg.homepage:
 pkg.keywords:
+
+pkg.deps:
+    - "@apache-mynewt-core/hw/sensor"

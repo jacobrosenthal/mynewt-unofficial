@@ -89,16 +89,16 @@ static const struct sensor_driver g_lis2dh_sensor_driver = {
 int
 lis2dh_default_cfg(struct lis2dh_cfg *cfg)
 {
-    cfg->accel_mode = LIS2DH_PWR_MODE_SUSPEND;
+    cfg->accel_mode = LIS2DH_PWR_MODE_NORMAL;
     cfg->accel_range = LIS2DH_ACCEL_RANGE_2;
-    cfg->accel_rate = LIS2DH_ACCEL_RATE_OFF;
+    cfg->accel_rate = LIS2DH_ACCEL_RATE_1;
     cfg->click_mode = LIS2DH_CLICK_OFF;
-    cfg->click_direction = LIS2DH_CLICK_ALL;
     cfg->click_threshold = 127; //if getting single clicks randomly, move up?, max 127
     cfg->click_time_limit = 127; //max 127
     cfg->click_time_window = 0x7f;
     cfg->click_time_latency = 128; //if getting double clicks randomly, move up?
-
+    cfg->accel_wake_threshold = 0; //threshold to surpass to bring out of sleep, anythin other than 0 to enable, max 127
+    cfg->accel_sleep_time_limit = 255; //time resting before goes back to sleep, max 255
     return 0;
 }
 
@@ -241,12 +241,13 @@ error:
  * @return 0 on success, non-zero on error
  */
 int
-lis2dh_get_vector_data(void *datastruct, struct lis2dh *lis)
+lis2dh_get_vector_data(void *datastruct, struct lis2dh_cfg *cfg)
 {
     uint8_t payload[6];
     int16_t x, y, z;
     struct sensor_accel_data *sad;
     float mg_lsb;
+    struct lis2dh_cfg liscfg = *cfg;
     int rc;
 
     memset (payload, 0, 6);
@@ -261,7 +262,7 @@ lis2dh_get_vector_data(void *datastruct, struct lis2dh *lis)
 
     uint8_t resolution_shift;
 
-    switch(lis->cfg.accel_mode) {
+    switch(liscfg.accel_mode) {
         case LIS2DH_PWR_MODE_HIGHRESOLUTION:
             // 12-bit
             resolution_shift = 4;
@@ -289,7 +290,7 @@ lis2dh_get_vector_data(void *datastruct, struct lis2dh *lis)
 
     sad = datastruct;
 
-    switch(lis->cfg.accel_range) {
+    switch(liscfg.accel_range) {
         case LIS2DH_ACCEL_RANGE_2:
 #if MYNEWT_VAL(LIS2DH_STATS)
             STATS_INC(g_lis2dhstats, samples_acc_2g);
@@ -316,7 +317,7 @@ lis2dh_get_vector_data(void *datastruct, struct lis2dh *lis)
             break;
         default:
             LIS2DH_ERR("Unknown accel range: 0x%02X. Assuming +/-2G.\n",
-                lis->cfg.accel_range);
+                liscfg.accel_range);
             mg_lsb = 0.005F;
             break;
     }
@@ -384,7 +385,7 @@ lis2dh_sensor_read(struct sensor *sensor, sensor_type_t type,
 
     if (type == SENSOR_TYPE_ACCELEROMETER) {
         /* Get vector data accel values */
-        rc = lis2dh_get_vector_data(databuf, lis);
+        rc = lis2dh_get_vector_data(databuf, &lis->cfg);
         if (rc) {
             goto err;
         }

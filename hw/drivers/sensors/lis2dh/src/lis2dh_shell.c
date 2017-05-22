@@ -65,7 +65,7 @@ lis2dh_shell_help(void)
 {
     console_printf("%s cmd [flags...]\n", lis2dh_shell_cmd_struct.sc_cmd);
     console_printf("cmd:\n");
-    console_printf("\tr\t[n_samples]\n\n");
+    // console_printf("\tr\t[n_samples]\n\n");
     console_printf("\tchip_id\n");
     console_printf("\tdumpreg [addr]\n");
 
@@ -94,52 +94,53 @@ lis2dh_shell_cmd_get_chip_id(int argc, char **argv)
     return 0;
 }
 
-static int
-lis2dh_shell_cmd_read(int argc, char **argv)
-{
-    uint16_t samples = 1;
-    long val;
-    int rc;
-    void *databuf;
-    struct sensor_accel_data *sad;
-    char tmpstr[13];
-    struct lis2dh lis;
+//need a way to get lis or lis->cfg to provide to lis2dh_get_vector_data
+// static int
+// lis2dh_shell_cmd_read(int argc, char **argv)
+// {
+//     uint16_t samples = 1;
+//     long val;
+//     int rc;
+//     void *databuf;
+//     struct sensor_accel_data *sad;
+//     char tmpstr[13];
+//     struct lis2dh lis;
 
-    if (argc > 4) {
-        return lis2dh_shell_err_too_many_args(argv[1]);
-    }
+//     if (argc > 4) {
+//         return lis2dh_shell_err_too_many_args(argv[1]);
+//     }
 
-    /* Since this is the biggest struct, malloc space for it */
-    databuf = malloc(sizeof(struct sensor_accel_data));
-    assert(databuf != NULL);
+//     /* Since this is the biggest struct, malloc space for it */
+//     databuf = malloc(sizeof(struct sensor_accel_data));
+//     assert(databuf != NULL);
 
-    /* Check if more than one sample requested */
-    if (argc == 4) {
-        if (sensor_shell_stol(argv[2], 1, UINT16_MAX, &val)) {
-            return lis2dh_shell_err_invalid_arg(argv[2]);
-        }
-        samples = (uint16_t)val;
-    }
+//     /* Check if more than one sample requested */
+//     if (argc == 4) {
+//         if (sensor_shell_stol(argv[2], 1, UINT16_MAX, &val)) {
+//             return lis2dh_shell_err_invalid_arg(argv[2]);
+//         }
+//         samples = (uint16_t)val;
+//     }
 
-    while (samples--) {
-        rc = lis2dh_get_vector_data(databuf, &lis);
-        if (rc) {
-            console_printf("Read failed: %d\n", rc);
-            goto err;
-        }
-        sad = databuf;
+//     while (samples--) {
+//         rc = lis2dh_get_vector_data(databuf, &lis.cfg);
+//         if (rc) {
+//             console_printf("Read failed: %d\n", rc);
+//             goto err;
+//         }
+//         sad = databuf;
 
-        console_printf("x:%s ", sensor_ftostr(sad->sad_x, tmpstr, 13));
-        console_printf("y:%s ", sensor_ftostr(sad->sad_y, tmpstr, 13));
-        console_printf("z:%s\n", sensor_ftostr(sad->sad_z, tmpstr, 13));
-    }
+//         console_printf("x:%s ", sensor_ftostr(sad->sad_x, tmpstr, 13));
+//         console_printf("y:%s ", sensor_ftostr(sad->sad_y, tmpstr, 13));
+//         console_printf("z:%s\n", sensor_ftostr(sad->sad_z, tmpstr, 13));
+//     }
 
-    free(databuf);
+//     free(databuf);
 
-    return 0;
-err:
-    return rc;
-}
+//     return 0;
+// err:
+//     return rc;
+// }
 
 // static int
 // lis2dh_shell_cmd_pwr_mode(int argc, char **argv)
@@ -225,10 +226,10 @@ lis2dh_shell_cmd(int argc, char **argv)
         return lis2dh_shell_help();
     }
 
-    /* Read command (get a new data sample) */
-    if (argc > 1 && strcmp(argv[1], "r") == 0) {
-        return lis2dh_shell_cmd_read(argc, argv);
-    }
+    // /* Read command (get a new data sample) */
+    // if (argc > 1 && strcmp(argv[1], "r") == 0) {
+    //     return lis2dh_shell_cmd_read(argc, argv);
+    // }
 
     /* Chip ID command */
     if (argc > 1 && strcmp(argv[1], "chip_id") == 0) {
