@@ -29,14 +29,16 @@ extern "C" {
 #endif
 
 /* Power modes */
-enum lis2dh_accel_pwr_mode {
+enum lis2dh_pwr_mode {
     LIS2DH_PWR_MODE_SUSPEND         = 0X00,
     LIS2DH_PWR_MODE_NORMAL          = 0X01,
     LIS2DH_PWR_MODE_LOWPOWER        = 0X02,
     LIS2DH_PWR_MODE_HIGHRESOLUTION  = 0X03
 };
 
-//CTRL_REG4 FS1 FS0
+//CTRL_REG4
+//FS1 FS0
+// BDU BLE FS1 FS0 HR ST1 ST0 SIM
 enum lis2dh_accel_range {
     LIS2DH_ACCEL_RANGE_2            = (0x00 << 4), /* +/- 2g  */
     LIS2DH_ACCEL_RANGE_4            = (0x01 << 4), /* +/- 4g  */
@@ -44,7 +46,8 @@ enum lis2dh_accel_range {
     LIS2DH_ACCEL_RANGE_16           = (0x03 << 4) /* +/- 16g */
 };
 
-//CTRL_REG1 ODR<3:0>
+//CTRL_REG1
+//ODR<3:0>
 enum lis2dh_accel_rate {
     LIS2DH_ACCEL_RATE_OFF           = (0x00 << 4), /* Power Down     */
     LIS2DH_ACCEL_RATE_1             = (0x01 << 4), /* 1hz     */
@@ -86,7 +89,7 @@ lis2dh_shell_init(void);
 #endif
 
 struct lis2dh_cfg {
-    enum lis2dh_accel_pwr_mode accel_mode;
+    enum lis2dh_pwr_mode mode;
     enum lis2dh_accel_range accel_range;
     enum lis2dh_accel_rate accel_rate;
     enum lis2dh_click_mode click_mode;

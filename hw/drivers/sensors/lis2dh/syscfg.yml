@@ -22,7 +22,7 @@
 
 syscfg.defs:
     LIS2DH_CLI:
-        description: 'CLI commands to interact with lis2dh.'
+        description: ''
         value: 0
     LIS2DH_SPIBUS:
         description: 'SPI bus number for the LIS2DH'
