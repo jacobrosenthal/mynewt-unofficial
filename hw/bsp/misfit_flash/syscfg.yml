@@ -44,10 +44,6 @@ syscfg.defs:
         description: 'CTS pin for UART0'
         value: 13
 
-    PWM_0:
-        description: 'Whether to enable PWM0'
-        value: 1
-
     SPI_0_MASTER:
         description: 'Whether to enable SPI 0 in master mode'
         value:  0

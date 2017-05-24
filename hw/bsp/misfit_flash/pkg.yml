@@ -81,13 +81,8 @@ pkg.deps:
     - "@apache-mynewt-core/hw/mcu/nordic/nrf51xxx"
     - "@apache-mynewt-core/libc/baselibc"
 
-pkg.deps.PWM_0:
-    - "@apache-mynewt-core/hw/drivers/pwm"
-    - "@mynewt-nordic/hw/drivers/pwm/pwm_nrf51"
-
 pkg.deps.BLE_DEVICE:
     - "@apache-mynewt-core/hw/drivers/nimble/nrf51"
 
 pkg.deps.UART_0:
     - "@apache-mynewt-core/hw/drivers/uart/uart_hal"
-

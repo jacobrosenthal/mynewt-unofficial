@@ -36,12 +36,6 @@
 static struct lis2dh lis2dh;
 #endif
 
-#if MYNEWT_VAL(PWM_0)
-#include <pwm/pwm.h>
-#include "pwm_nrf51/pwm_nrf51.h"
-struct pwm_dev os_bsp_pwm0;
-#endif
-
 #if MYNEWT_VAL(UART_0)
 #include "uart/uart.h"
 #include "uart_hal/uart_hal.h"
@@ -54,9 +48,6 @@ static const struct nrf51_uart_cfg os_bsp_uart0_cfg = {
     .suc_pin_cts = MYNEWT_VAL(UART_0_PIN_CTS),
 };
 #endif
-
-
-
 
 #if MYNEWT_VAL(SPI_0_MASTER)
 /*
@@ -148,14 +139,6 @@ sensor_dev_create(void)
 #if MYNEWT_VAL(LIS2DH_PRESENT)
     rc = os_dev_create((struct os_dev *) &lis2dh, "accel0",
       OS_DEV_INIT_PRIMARY, 0, lis2dh_init, NULL);
-    assert(rc == 0);
-#endif
-
-#if MYNEWT_VAL(PWM_0)
-    //this would probably be in the bsp except the licensing issues?
-    rc = os_dev_create((struct os_dev *) &os_bsp_pwm0, "pwm0",
-            OS_DEV_INIT_KERNEL, OS_DEV_INIT_PRIO_DEFAULT,
-            nrf51_pwm_dev_init, NULL);
     assert(rc == 0);
 #endif
 }
